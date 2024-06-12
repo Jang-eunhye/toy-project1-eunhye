@@ -3,8 +3,17 @@ import morgan from 'morgan'
 import fs from 'fs'
 import db from './database.js'
 
+const THRESHOLD = 2000
 const port = process.env.PORT || 8080
 const app = express()
+
+app.use((req, res, next) => {
+  const delayTime = Math.floor(Math.random() * THRESHOLD)
+
+  setTimeout(() => {
+    next();
+  }, delayTime);
+})
 
 app.use(morgan('dev'))
 app.use(express.static('dist'))
@@ -12,22 +21,18 @@ app.use(express.json())
 
 app.get('/api/counter', (req, res) => {
   const counter = Number(req.query.latest)
-  const threshold = 2000
-  const responseTime = Math.floor(Math.random() * threshold)
 
-  setTimeout(() => {
-    if (Math.floor(Math.random() * 10) <= 3) {
-      res.status(400).send({
-        status: 'Error',
-        data: null,
-      })
-    } else {
-      res.status(200).send({
-        status: 'OK',
-        data: counter + 1,
-      })
-    }
-  }, responseTime)
+  if (Math.floor(Math.random() * 10) <= 3) {
+    res.status(400).send({
+      status: 'Error',
+      data: null,
+    })
+  } else {
+    res.status(200).send({
+      status: 'OK',
+      data: counter + 1,
+    })
+  }
 })
 
 app.get('/api/users.json', (req, res) => {
